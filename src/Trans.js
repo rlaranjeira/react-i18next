@@ -11,6 +11,7 @@ function getChildren(node) {
 }
 
 function nodesToString(mem, children, index) {
+  if (!children) return '';
   if (Object.prototype.toString.call(children) !== '[object Array]') children = [children];
 
   children.forEach((child, i) => {
@@ -34,7 +35,12 @@ function nodesToString(mem, children, index) {
         mem = `${mem}<${elementKey}>{{${keys[0]}, ${format}}}</${elementKey}>`;
       } else if (keys.length === 1) {
         mem = `${mem}<${elementKey}>{{${keys[0]}}}</${elementKey}>`;
+      } else if (console && console.warn) {
+        // not a valid interpolation object (can only contain one value plus format)
+        console.warn(`react-i18next: the passed in object contained more than one variable - the object should look like {{ value, format }} where format is optional.`, child)
       }
+    } else if (console && console.warn) {
+      console.warn(`react-i18next: the passed in value is invalid - seems you passed in a variable like {number} - please pass in variables for interpolation as full objects like {{number}}.`, child)
     }
   });
 
@@ -42,6 +48,8 @@ function nodesToString(mem, children, index) {
 }
 
 function renderNodes(children, targetString, i18n) {
+  if (targetString === "") return [];
+  if (!children) return [targetString];
 
   // parse ast from string with additional wrapper tag
   // -> avoids issues in parser removing prepending text nodes
@@ -67,8 +75,11 @@ function renderNodes(children, targetString, i18n) {
             inner
           ));
         } else if (typeof child === 'object' && !isElement) {
-          const interpolated = i18n.services.interpolator.interpolate(node.children[0].content, child, i18n.language);
-          mem.push(interpolated);
+          const content = node.children[0] ? node.children[0].content : null
+          if (content) {
+            const interpolated = i18n.services.interpolator.interpolate(node.children[0].content, child, i18n.language);
+            mem.push(interpolated);
+          }
         } else {
           mem.push(child);
         }
@@ -87,49 +98,54 @@ function renderNodes(children, targetString, i18n) {
 }
 
 
-export default class Trans extends React.PureComponent {
-
-  constructor(props, context) {
-    super(props, context);
-    this.i18n = props.i18n || context.i18n;
-    this.t = props.t || context.t;
-  }
+export default class Trans extends React.Component {
 
   render() {
-    const { children, count, parent, i18nKey, ...additionalProps } = this.props;
+    const contextAndProps = { i18n: this.context.i18n, t: this.context.t, ...this.props };
+    const { children, count, parent, i18nKey, tOptions, values, defaults, components, ns: namespace, i18n, t: tFromContextAndProps, ...additionalProps } = contextAndProps;
+    const t = tFromContextAndProps || i18n.t.bind(i18n);
 
-    const defaultValue = nodesToString('', children, 0);
-    const key = i18nKey || defaultValue;
-    const translation = this.t(key, { interpolation: { prefix: '#$?', suffix: '?$#' }, defaultValue, count });
+    const reactI18nextOptions = (i18n.options && i18n.options.react) || {};
+    const useAsParent = parent !== undefined ? parent : reactI18nextOptions.defaultTransParent;
 
-    if (this.i18n.options.react && this.i18n.options.react.exposeNamespace) {
-      let ns = typeof this.t.ns === 'string' ? this.t.ns : this.t.ns[0];
-      if (i18nKey && this.i18n.options.nsSeparator && i18nKey.indexOf(this.i18n.options.nsSeparator) > -1) {
-        const parts = i18nKey.split(this.i18n.options.nsSeparator);
+    const defaultValue = defaults || nodesToString('', children, 0);
+    const hashTransKey = reactI18nextOptions.hashTransKey;
+    const key = i18nKey || (hashTransKey ? hashTransKey(defaultValue) : defaultValue);
+    const interpolationOverride = values ? {} : { interpolation: { prefix: '#$?', suffix: '?$#' } };
+    const translation = key ? t(key, { ...tOptions, ...values, ...interpolationOverride, defaultValue, count, ns: namespace }) : defaultValue;
+
+    if (reactI18nextOptions.exposeNamespace) {
+      let ns = typeof t.ns === 'string' ? t.ns : t.ns[0];
+      if (i18nKey && i18n.options && i18n.options.nsSeparator && i18nKey.indexOf(i18n.options.nsSeparator) > -1) {
+        const parts = i18nKey.split(i18n.options.nsSeparator);
         ns = parts[0];
       }
-      if (this.t.ns) additionalProps['data-i18next-options'] = JSON.stringify({ ns });
+      if (t.ns) additionalProps['data-i18next-options'] = JSON.stringify({ ns });
     }
 
+    if (!useAsParent) return renderNodes(components || children, translation, i18n);
+
     return React.createElement(
-      parent,
+      useAsParent,
       additionalProps,
-      renderNodes(children, translation, this.i18n)
+      renderNodes(components || children, translation, i18n)
     );
   }
 }
 
 Trans.propTypes = {
   count: PropTypes.number,
-  parent: PropTypes.string,
-  i18nKey: PropTypes.string
+  parent: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
+  i18nKey: PropTypes.string,
+  i18n: PropTypes.object,
+  t: PropTypes.func
 };
 
-Trans.defaultProps = {
-  parent: 'div'
-};
+// Trans.defaultProps = {
+//   parent: 'div'
+// };
 
 Trans.contextTypes = {
-  i18n: PropTypes.object.isRequired,
-  t: PropTypes.func.isRequired
+  i18n: PropTypes.object,
+  t: PropTypes.func
 };

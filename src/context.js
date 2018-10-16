@@ -4,7 +4,9 @@ let defaultOptions = {
   bindI18n: 'languageChanged loaded',
   bindStore: 'added removed',
   translateFuncName: 't',
-  nsMode: 'default'
+  nsMode: 'default',
+  usePureComponent: false,
+  omitBoundRerender: true,
 };
 
 let i18n;
@@ -31,5 +33,5 @@ export const reactI18nextModule = {
   init(instance) {
     setDefaults(instance.options.react);
     setI18n(instance);
-  }
+  },
 };

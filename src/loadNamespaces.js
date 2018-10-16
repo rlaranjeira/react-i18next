@@ -1,8 +1,19 @@
+const objectEntries = Object.entries ||
+  function( obj ){
+    var ownProps = Object.keys( obj ),
+        i = ownProps.length,
+        resArray = new Array(i); // preallocate the Array
+    while (i--)
+      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+    return resArray;
+  };
+
 // Borrowed from https://github.com/Rezonans/redux-async-connect/blob/master/modules/ReduxAsyncConnect.js#L16
 function eachComponents(components, iterator) {
   for (let i = 0, l = components.length; i < l; i++) { // eslint-disable-line id-length
     if (typeof components[i] === 'object') {
-      for (const [key, value] of Object.entries(components[i])) {
+      for (const [key, value] of objectEntries(components[i])) {
         iterator(value, i, key);
       }
     } else {

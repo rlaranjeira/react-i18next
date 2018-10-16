@@ -6,18 +6,10 @@ import Trans from '../src/Trans';
 describe('trans', () => {
   it('should have some stuff', () => {
     expect(Trans.contextTypes.i18n)
-      .toBe(PropTypes.object.isRequired);
-    expect(Trans.contextTypes.t)
-      .toBe(PropTypes.func.isRequired);
-    const props = {};
-    const context = {
-      i18n: {},
-      t(message) {
-        return message;
-      }
-    };
-    const trans = new Trans(props, context);
-    expect(trans.i18n).toBe(context.i18n);
-    expect(trans.t).toBe(context.t);
+      .toBe(PropTypes.object);
+    expect(Trans.propTypes.i18n)
+      .toBe(PropTypes.object);
+    expect(Trans.propTypes.t)
+      .toBe(PropTypes.func);
   });
 });

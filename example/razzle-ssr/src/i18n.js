@@ -10,7 +10,6 @@ const options = {
   ns: ['translations'],
   defaultNS: 'translations',
 
-  keySeparator: '##### not used #####', // as we use full text keys in this sample
   saveMissing: true,
   debug: true,
 
@@ -24,8 +23,9 @@ const options = {
     format: (value, format, lng) => {
       if (format === 'uppercase') return value.toUpperCase();
       return value;
-    }
-  }
+    },
+  },
+  wait: process && !process.release,
 };
 
 // for browser use xhr backend to load translations and browser lng detector

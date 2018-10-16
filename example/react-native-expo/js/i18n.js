@@ -7,7 +7,7 @@ import Expo from 'expo';
 const languageDetector = {
   type: 'languageDetector',
   async: true, // flags below detection to be async
-  detect: (callback) => { return /*'en'; */ Expo.Util.getCurrentLocaleAsync().then(lng => { callback(lng); })  },
+  detect: (callback) => { return /*'en'; */ Expo.DangerZone.Localization.getCurrentLocaleAsync().then(lng => { callback(lng.replace('_', '-')); }) },
   init: () => {},
   cacheUserLanguage: () => {}
 }
@@ -34,7 +34,8 @@ i18n
             toggleToGerman: 'Deutsch',
             toggleToEnglish: 'English',
             goToPage2: 'Open page 2'
-          }
+          },
+          infoText: "<0><0>Eins </O><1>Zwei </1><2>Drei </2><3>Vier </3><4>Fünf</4></O>"
         }
       },
       de: {
