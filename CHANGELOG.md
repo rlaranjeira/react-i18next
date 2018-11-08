@@ -1,3 +1,109 @@
+### 8.3.6
+
+- remove componentWillReceiveProps call in I18nextProvider to comply with react strict mode [596](https://github.com/i18next/react-i18next/pull/596)
+
+### 8.3.5
+
+- rename named export to window.ReactI18next for standalone js
+
+### 8.3.4
+
+- try fixing standalone browser build
+
+### 8.3.3
+
+- remove wait option in hooks code (not used anylonger)
+
+### 8.3.2
+
+- use react suspense in hooks experimental code [learn more](https://react.i18next.com/experimental/using-with-hooks)
+
+### 8.3.1
+
+- make export in ./hooks.js explicit
+
+### 8.3.0
+
+- Ensure withI18n hoists static members. [584](https://github.com/i18next/react-i18next/pull/584)
+
+### 8.2.0
+
+- comes with support for hooks that are experimental in react v16.7.0-alpha [learn more](https://react.i18next.com/experimental/using-with-hooks)
+
+### 8.1.2
+
+- publish changes to typescript definitions [567](https://github.com/i18next/react-i18next/pull/567)
+
+### 8.1.1
+
+- persisting generated i18nOptions on withI18n hoc to avoid rerenders on pure components
+
+### 8.1.0
+
+- add typedefinitions [557](https://github.com/i18next/react-i18next/pull/557)
+
+### 8.0.8
+
+- add innerRefs support to withContext, withI18n
+
+### 8.0.7
+
+- replaces getWrappedInstance on withNamespaces / translate with passing a innerRef https://github.com/facebook/react/issues/13456 [534](https://github.com/i18next/react-i18next/issues/534)
+
+### 8.0.6
+
+- fix SSR cases
+
+### 8.0.5
+
+- fix issue with context not applied when merging i18n options
+
+### 8.0.4
+
+- add prop-types to peer deps as long we use the ponyfill create-react-context
+
+### 8.0.3
+
+- remove prop-types in tests
+
+### 8.0.2
+
+- remove proptypes dependency - not needed anylonger as we do not define old context
+- move out ssr stuff to utils
+- move reportNS to the NamespacesConsumer
+
+### 8.0.1
+
+- use @babel/plugin-transform-runtime
+
+### 8.0.0
+
+- translate HOC was renamed to "withNamespaces" as it controls which namespaces should be loaded
+- I18n render prop was renamed to "NamespacesConsumer" as it controls which namespaces should be "consumed"
+- there is a new context.consuming HOC "withI18n" adds i18n, t to component props (without the extra options of withNamespaces)
+
+- there is a simplification for interpolation in translations
+
+`'Hello <1><0>{{name}}</0></1>, you have <3>{{count}}</3> message. Open <5>hear</5>.'`
+
+can be written as:
+
+`'Hello <1>{{name}}</1>, you have {{count}} message. Open <5>hear</5>.'`
+
+=> there is no need to add `<0>...</0>` around interpolated values anylonger
+=> your old files having those extra pseudo tags will still work without needing to change them
+
+- there is a new I18nContext -> I18nContext.provider, I18next.consumer using new react context api
+
+**Using react's new context api**
+
+should be non breaking in most cases, with following exceptions:
+
+- using preact you will have to use preact.createContext plugin (or eventual hope the provided polyfill works for preact too)
+- you used the translate.getWrappedInstance function -> you will need to use instance.getWrappedInstance().getWrappedInstance() now as the translate hoc is now wrapped in an additional I18nContext.Consumer
+
+still we prefer to increase this to a **major version** as beside the described egde cases there might be other effects we not have covered with our tests
+
 ### 7.13.0
 
 - Load missing namespaces when updating ns prop on I18n component [523](https://github.com/i18next/react-i18next/pull/523)

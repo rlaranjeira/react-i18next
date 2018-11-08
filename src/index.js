@@ -1,7 +1,20 @@
-export { default as translate } from './translate';
-export { default as I18n } from './I18n';
-export { default as Interpolate } from './Interpolate';
-export { default as Trans } from './Trans';
-export { default as I18nextProvider } from './I18nextProvider';
-export { default as loadNamespaces } from './loadNamespaces';
-export { reactI18nextModule, setDefaults, getDefaults, setI18n, getI18n } from './context';
+export { loadNamespaces } from './utils';
+
+export { withNamespaces, translate } from './withNamespaces';
+export { NamespacesConsumer, I18n } from './NamespacesConsumer';
+
+export { Trans } from './Trans';
+export { I18nextProvider } from './I18nextProvider';
+
+export {
+  withI18n,
+  I18nContext,
+  reactI18nextModule,
+  setDefaults,
+  getDefaults,
+  setI18n,
+  getI18n,
+} from './context';
+
+// will be deprecated in v9.0.0
+export { Interpolate } from './Interpolate';
