@@ -1,21 +1,17 @@
-const i18n = require('i18next');
-const XHR = require('i18next-xhr-backend');
-const LanguageDetector = require('i18next-browser-languagedetector');
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import XHR from 'i18next-xhr-backend';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 const options = {
   fallbackLng: 'en',
   load: 'languageOnly', // we only provide en, de -> no region specific locals like en-US, de-DE
-
   // have a common namespace used around the full app
   ns: ['translations'],
   defaultNS: 'translations',
 
   saveMissing: true,
   debug: true,
-
-  // cache: {
-  //   enabled: true
-  // },
 
   interpolation: {
     escapeValue: false, // not needed for react!!
@@ -32,11 +28,13 @@ const options = {
 if (process && !process.release) {
   i18n
     .use(XHR)
-    // .use(Cache)
-    .use(LanguageDetector);
+    .use(initReactI18next)
+    .use(LanguageDetector)
 }
 
 // initialize if not already initialized
-if (!i18n.isInitialized) i18n.init(options);
+if (!i18n.isInitialized) {
+  i18n.init(options);
+}
 
-module.exports = i18n;
+export default i18n;

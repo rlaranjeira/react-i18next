@@ -1,3 +1,248 @@
+### 10.12.2
+
+- Trans: do not replace html tags in translation strings that are not in the transKeepBasicHtmlNodesFor array [919](https://github.com/i18next/react-i18next/issues/919)
+
+### 10.12.1
+
+- Set ready flag to false when i18n instance has not been initialised [918](https://github.com/i18next/react-i18next/pull/918)
+
+### 10.12.0
+
+- fix / extend icu.macro: ICU: Trans macro will parse defaults as alternate to children [917](https://github.com/i18next/react-i18next/pull/917)
+
+### 10.11.5
+
+- typescript: fix types for use() [912](https://github.com/i18next/react-i18next/pull/912)
+
+### 10.11.4
+
+- assert edge case trans component get set a key
+- assert context get destructed of empty object if context gets used falsely on a component got pulled out of main tree from react-portal or similar
+
+### 10.11.3
+
+- only apply initial values in useSSR, withSSR on i18next instances not being a clone (eg. created by express middleware on server) ==> don't apply on serverside
+
+### 10.11.2
+
+- Reload translations whenever namespaces passed to useTranslation() change [878](https://github.com/i18next/react-i18next/pull/878)
+
+### 10.11.1
+
+- fixes a regression in Trans component taking namespace from passed t function [867](https://github.com/i18next/react-i18next/issues/867#issuecomment-502395958)
+
+### 10.11.0
+
+- Restore support passing the defaultNS via I18nextProvider prop [860](https://github.com/i18next/react-i18next/pull/860)
+
+### 10.10.0
+
+- HOC: expose wrapped component as WrappedComponent property [853](https://github.com/i18next/react-i18next/pull/853)
+
+### 10.9.1
+
+- Fix useEffect mount/unmount usage [852](https://github.com/i18next/react-i18next/pull/852)
+
+### 10.9.0
+
+- trigger suspense on languageChanging by add listening to that event too (new in i18next@15.1.0) - if you do not like this behaviour of suspending during languageChange - remove it from bindI18n
+
+### 10.8.1
+
+- expose context [829](https://github.com/i18next/react-i18next/pull/829)
+
+### 10.8.0
+
+- Support taking values for interpolation not only from content but the props count, values too: Replace count prop from <Trans> in translation string automatically [826](https://github.com/i18next/react-i18next/issues/826)
+
+### 10.7.0
+
+- brings back nsMode=default|fallback [822](https://github.com/i18next/react-i18next/pull/822)
+- typescript: Add missing type definition for withTranslation options [821](https://github.com/i18next/react-i18next/pull/821)
+
+### 10.6.2
+
+- Fix Trans component ignore default options [818](https://github.com/i18next/react-i18next/pull/818)
+
+### 10.6.1
+
+- useTranslation useEffect also guard against unmounted for bound events...seems unmount and actual call to useEffect cleanup are not in correct order (component is first unmounted and then unbound - should be vice versa)
+
+### 10.6.0
+
+- use forwardRef for withTranslation [802](https://github.com/i18next/react-i18next/pull/802)
+- fixes Translation reset after component is unmounted with useTranslation [801](https://github.com/i18next/react-i18next/issues/801)
+
+### 10.5.3
+
+- Fix the displayName of HOC components [798](https://github.com/i18next/react-i18next/pull/798)
+
+### 10.5.2
+
+- fixes: transSupportBasicHtmlNodes doesn't work with self-closing Trans [790](https://github.com/i18next/react-i18next/issues/790)
+
+### 10.5.1
+
+- ReferenceError: setImmediate is not defined [787](https://github.com/i18next/react-i18next/issues/787)
+
+### 10.5.0
+
+- Adding support for nested component inside Trans that are a list.map like `<ul>{['a', 'b'].map(item => ( <li key={item}>{item}</li> ))}</ul>` [784](https://github.com/i18next/react-i18next/pull/784) (Adding `<ul i18nIsDynamicList>` will also create correct missing string)
+
+### 10.4.2
+
+- typescript: updated typescript definition of the UseTranslationOptions interface, added the useSuspense configuration property [778](https://github.com/i18next/react-i18next/pull/778)
+
+### 10.4.1
+
+- allow p in Trans
+
+### 10.4.0
+
+- allow br, strong, i tags be used for translations handled by Trans
+
+### 10.3.1
+
+- IE11 sending console as the first argument to apply [774](https://github.com/i18next/react-i18next/pull/774)
+
+### 10.3.0
+
+- Allow to enable/disable useSuspense at a hook or component level [769](https://github.com/i18next/react-i18next/pull/769)
+- typescript: Add ready/tReady type definitions [753](https://github.com/i18next/react-i18next/pull/753)
+
+### 10.2.1
+
+- fix cimode won't load therefore won't be ready [768](https://github.com/i18next/react-i18next/issues/768)
+
+### 10.2.0
+
+- Add bindI18nStore event options to listen to store changes if needed [749](https://github.com/i18next/react-i18next/pull/749)
+
+### 10.1.2
+
+- allow passing ready if i18next not initialized yet but initialStore set (timing issue in razzle)
+
+### 10.1.1
+
+- forward ready state in withTranslation, Translation
+
+### 10.1.0
+
+- better naming for Wrappers in HOC for easier use of react debugger in console
+- allow setting options react.useSuspense to false on i18next.init to avoid usage of suspense
+
+### 10.0.5
+
+- fixes namespace loading for false inital state undefined
+- typescript: Make children optional within TransProps [728](https://github.com/i18next/react-i18next/pull/728)
+
+### 10.0.4
+
+- try avoiding pull in of regenerator runtime for async usage -> use Promise for now
+
+### 10.0.3
+
+- fix initial props on withSSR
+
+### 10.0.2
+
+- refactor ready state in useTranslation
+
+### 10.0.1
+
+- allow object spread `const { t } = useTranslation()` [714](https://github.com/i18next/react-i18next/pull/714)
+- typescript: add types for I18nextProvider [721](https://github.com/i18next/react-i18next/pull/721)
+
+### 10.0.0
+
+- released to npm
+- for MIGRATION READ [https://react.i18next.com/latest/migrating-v9-to-v10](https://react.i18next.com/latest/migrating-v9-to-v10)
+
+### 10.0.0-alpha.3
+
+- hooks: make reportNS bound to the i18n instance - so report is per request [711](https://github.com/i18next/react-i18next/issues/711)
+
+### 10.0.0-alpha.2
+
+- hooks: add Translation render prop [708](https://github.com/i18next/react-i18next/issues/708)
+- hooks: add I18nextProvider for passing i18n instance via context
+- hooks: might fix infinit loop issue on undefined language (set ready to true anyway) [673](https://github.com/i18next/react-i18next/issues/673)
+
+### 10.0.0-alpha.1
+
+- hooks: initial alpha version with all build targets -> preparing v10 release
+
+### 9.0.10
+
+- typescript: Add TS definition for reportNS prop [699](https://github.com/i18next/react-i18next/pull/699)
+
+### 9.0.9
+
+- typescript: fix: useTranslation hooks typing [698](https://github.com/i18next/react-i18next/pull/698)
+
+### 9.0.8
+
+- typescript: TFunction usage inside NamespacesConsumer should behave [694](https://github.com/i18next/react-i18next/pull/694)
+
+### 9.0.7
+
+- fixing react-i18next throwing webpack error when initializeing using @babel/runtime 7.3.0 [685](https://github.com/i18next/react-i18next/issues/685)
+
+### 9.0.6
+
+- updated all deps
+
+### 9.0.5
+
+- UMD: Environment optimization with rollup-plugin-replace support [683](https://github.com/i18next/react-i18next/pull/683)
+
+### 9.0.4
+
+- typescript: add generic type to t function and the tests [665](https://github.com/i18next/react-i18next/pull/665)
+- hooks: enable passing in i18n to useTranslation hook so we could wrap that with a useContext enabled hook
+
+### 9.0.3
+
+- fix useSSR for hooks storing state on i18n instance and not globally [671](https://github.com/i18next/react-i18next/issues/671)
+- should fix case where fallbackLng is set false and invalid lng is loaded in hooks -> never ready [677](https://github.com/i18next/react-i18next/issues/677)
+- multiple typescript improvements
+
+### 9.0.2
+
+- fix hooks ts [658](https://github.com/i18next/react-i18next/pull/658)
+
+### 9.0.1
+
+- fix ts [655](https://github.com/i18next/react-i18next/pull/655)
+
+### 9.0.0
+
+- allow defining `transEmptyNodeValue` in i18next.options.react to set a default fallback value for empty nodes to allow i18next fallback flow [462](https://github.com/i18next/react-i18next/pull/462)
+- Warn if i18next instance is a promise [652](https://github.com/i18next/react-i18next/pull/652)
+- keeping legacy names (no deprecation on them as this will be last version using those -> v10 will be based on hooks)
+
+**BREAKING**
+
+- out of licensing reasons the ponyfill for react-context had to be removed [635](https://github.com/i18next/react-i18next/issues/635)
+
+Using react >= 16.3.0 will be save - in other cases you will need to polyfill react.createContext yourself!!
+
+### 8.4.0
+
+- update typescript definitions for i18next v13 [631](https://github.com/i18next/react-i18next/pull/631)
+
+### 8.3.9
+
+- try fixing hooks ready algorithm [642](https://github.com/i18next/react-i18next/issues/642)
+
+### 8.3.8
+
+- try fixing edge case of unset state: [615](https://github.com/i18next/react-i18next/issues/615)
+
+### 8.3.7
+
+- handle initial SSR props only once
+
 ### 8.3.6
 
 - remove componentWillReceiveProps call in I18nextProvider to comply with react strict mode [596](https://github.com/i18next/react-i18next/pull/596)

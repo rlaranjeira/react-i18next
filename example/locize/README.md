@@ -8,8 +8,17 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 We added our translation management [locize.com](http://locize.com).
 
+InContext Editing:
+
 - [locize-editor](https://github.com/locize/locize-editor)
+
+i18next Backend: loading translations, save new segments during runtime
+
 - [i18next-locize-backend](https://github.com/locize/i18next-locize-backend)
+
+last used: sets a timestamp on every key touched -> safely remove old/unused keys
+
+- [locize-lastused](https://github.com/locize/locize-lastused)
 
 You will find your project informations like projectId and apiKey on your locize projects settings. (Signup add a new project for testing).
 

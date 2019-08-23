@@ -2,12 +2,8 @@ import React from 'react';
 import { shallow, render, mount } from 'enzyme';
 import ifReact from 'enzyme-adapter-react-helper/build/ifReact';
 import i18n from './i18n';
-import { withNamespaces } from '../src/withNamespaces';
+import { withTranslation } from '../src/withTranslation';
 import { Trans } from '../src/Trans';
-
-const context = {
-  i18n,
-};
 
 function Link({ to, children }) {
   return <a href={to}>{children}</a>;
@@ -25,62 +21,56 @@ describe('trans simple', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           Go <Link to="/msgs">there</Link>.
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 
-  ifReact('>= 16', describe, describe.skip)(
-    'trans simple - setting back default behaviour of no parent',
-    () => {
-      // we set in ./i18n react.defaultTransParent so all tests run backwards compatible
-      // and this tests new default bahaviour of just returning children
-      const TestElement = ({ t, parent }) => {
-        const count = 10;
-        const name = 'Jan';
-        return (
-          <Trans i18nKey="transTest1_noParent" parent={false}>
-            <span>
-              Open <Link to="/msgs">here</Link>.
-            </span>
-          </Trans>
-        );
-      };
+  // ifReact('>= 16', describe, describe.skip)(
+  //   'trans simple - setting back default behaviour of no parent',
+  //   () => {
+  //     // we set in ./i18n react.defaultTransParent so all tests run backwards compatible
+  //     // and this tests new default bahaviour of just returning children
+  //     const TestElement = ({ t, parent }) => {
+  //       const count = 10;
+  //       const name = 'Jan';
+  //       return (
+  //         <Trans i18nKey="transTest1_noParent" parent={false}>
+  //           <span>
+  //             Open <Link to="/msgs">here</Link>.
+  //           </span>
+  //         </Trans>
+  //       );
+  //     };
 
-      it('should render correct content', () => {
-        const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-        const wrapper = mount(<HocElement i18n={i18n} />);
-        // console.log(wrapper.debug());
-        expect(
-          wrapper.contains(
-            <span>
-              Go <Link to="/msgs">there</Link>.
-            </span>
-          )
-        ).toBe(true);
-      });
-    }
-  );
+  //     it('should render correct content', () => {
+  //       const wrapper = mount(<TestElement />);
+  //       // console.log(wrapper.debug());
+  //       expect(
+  //         wrapper.contains(
+  //           <span>
+  //             Go <Link to="/msgs">there</Link>.
+  //           </span>
+  //         )
+  //       ).toBe(true);
+  //     });
+  //   }
+  // );
 
   it('can use a different parent element', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} parent="span" />);
+    const wrapper = mount(<TestElement parent="span" />);
     expect(
       wrapper.contains(
         <span>
           Go <Link to="/msgs">there</Link>.
-        </span>
-      )
+        </span>,
+      ),
     ).toBe(true);
   });
 });
@@ -93,16 +83,14 @@ describe('trans simple using ns prop', () => {
   );
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           Another go <Link to="/msgs">there</Link>.
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 });
@@ -114,17 +102,49 @@ describe('trans simple with custom html tag', () => {
     </Trans>
   );
 
-  it('should skip custom html tags', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
+  const TestElement2 = ({ t, parent }) => (
+    <Trans i18nKey="transTest1_customHtml2" parent={parent} />
+  );
 
-    const wrapper = mount(<HocElement i18n={i18n} />);
+  const TestElement3 = ({ t, parent }) => (
+    <Trans i18nKey="transTest1_customHtml3" parent={parent} />
+  );
+
+  it('should not skip custom html tags', () => {
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
-          Go <Link to="/msgs">there</Link>.
-        </div>
-      )
+          <strong>Go</strong> <br />
+          <Link to="/msgs">there</Link>.
+        </div>,
+      ),
+    ).toBe(true);
+  });
+
+  it('should not skip custom html tags - empty node', () => {
+    const wrapper = mount(<TestElement2 />);
+    // console.log(wrapper.debug());
+    expect(
+      wrapper.contains(
+        <div>
+          <strong>Go</strong> <br /> there.
+        </div>,
+      ),
+    ).toBe(true);
+  });
+
+  it('should skip custom html tags not listed in transKeepBasicHtmlNodesFor', () => {
+    const wrapper = mount(<TestElement3 />);
+    // console.log(wrapper.debug());
+    expect(
+      wrapper.contains(
+        <div>
+          <strong>Go</strong>&lt;video
+          /&gt;&lt;script&gt;console.warn(&quot;test&quot;)&lt;/script&gt; there.
+        </div>,
+      ),
     ).toBe(true);
   });
 });
@@ -140,9 +160,7 @@ describe('trans testTransKey1 singular', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(wrapper.contains(<div>1 item matched.</div>)).toBe(true);
   });
@@ -159,9 +177,7 @@ describe('trans testTransKey1 plural', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(wrapper.contains(<div>10 items matched.</div>)).toBe(true);
   });
@@ -178,16 +194,14 @@ describe('trans testTransKey2', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           <span className="matchCount">10</span> items matched.
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 });
@@ -203,16 +217,14 @@ describe('trans testTransKey3', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           Result: <span className="matchCount">10</span> items matched.
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 });
@@ -230,16 +242,39 @@ describe('trans complex', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.warn(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           Hello <strong>Jan</strong>, you have 10 messages. Open <Link to="/msgs">here</Link>.
-        </div>
-      )
+        </div>,
+      ),
+    ).toBe(true);
+  });
+});
+
+describe('trans complex - count only in props', () => {
+  const TestElement = ({ t }) => {
+    const count = 10;
+    const name = 'Jan';
+    // prettier-ignore
+    return (
+      <Trans i18nKey="transTest2" count={count}>
+        Hello <strong>{{ name }}</strong>, you have {{n: count}} message. Open <Link to="/msgs">here</Link>.
+      </Trans>
+    );
+  };
+
+  it('should render correct content', () => {
+    const wrapper = mount(<TestElement />);
+    // console.warn(wrapper.debug());
+    expect(
+      wrapper.contains(
+        <div>
+          Hello <strong>Jan</strong>, you have 10 messages. Open <Link to="/msgs">here</Link>.
+        </div>,
+      ),
     ).toBe(true);
   });
 });
@@ -257,16 +292,14 @@ describe('trans complex v2 no extra pseudo elements for interpolation', () => {
   };
 
   it('should render correct content', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.warn(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           Hello <strong>Jan</strong>, you have 10 messages. Open <Link to="/msgs">here</Link>.
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 });
@@ -290,46 +323,45 @@ describe('trans with t as prop', () => {
       usedCustomT = true;
     };
 
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
+    const HocElement = withTranslation(['translation'], {})(TestElement);
 
-    mount(<HocElement i18n={i18n} cb={cb} />);
+    mount(<HocElement cb={cb} />);
     expect(usedCustomT).toBe(true);
   });
 
   it('should not pass t to HTML element', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
+    const HocElement = withTranslation(['translation'], {})(TestElement);
 
     const wrapper = mount(<HocElement i18n={i18n} />);
     expect(
       wrapper.contains(
         <div>
           Go <Link to="/msgs">there</Link>.
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 });
 
 describe('trans with empty content', () => {
-  const TestElement = ({ t, cb }) => <Trans />;
+  const TestElement = () => <Trans />;
   it('should render an empty string', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
+    // console.log(wrapper.debug());
     expect(wrapper.contains(<div />)).toBe(true);
   });
 });
 
 describe('trans with only content from translation file - no children', () => {
-  const TestElement = ({ t, cb }) => <Trans i18nKey="key1" />;
+  const TestElement = () => <Trans i18nKey="key1" />;
   it('should render translated string', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     expect(wrapper.contains(<div>test</div>)).toBe(true);
   });
 });
 
 describe('trans using no children but props - icu case', () => {
-  const TestElement = ({ t, cb }) => (
+  const TestElement = () => (
     <Trans
       defaults="hello <0>{{what}}</0>"
       values={{ what: 'world' }}
@@ -337,21 +369,20 @@ describe('trans using no children but props - icu case', () => {
     />
   );
   it('should render translated string', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <div>
           hello <strong>world</strong>
-        </div>
-      )
+        </div>,
+      ),
     ).toBe(true);
   });
 });
 
 describe('trans using no children but props - nested case', () => {
-  const TestElement = ({ t, cb }) => (
+  const TestElement = () => (
     <Trans
       defaults="<0>hello <1></1> {{what}}</0>"
       values={{ what: 'world' }}
@@ -364,15 +395,135 @@ describe('trans using no children but props - nested case', () => {
     />
   );
   it('should render translated string', () => {
-    const HocElement = withNamespaces(['translation'], {})(TestElement);
-    const wrapper = mount(<HocElement i18n={i18n} />);
+    const wrapper = mount(<TestElement />);
     // console.log(wrapper.debug());
     expect(
       wrapper.contains(
         <span>
           hello <br /> world
-        </span>
-      )
+        </span>,
+      ),
     ).toBe(true);
+  });
+});
+
+describe('trans using no children but props - self closing case', () => {
+  const TestElement = () => (
+    <Trans defaults="hello <0/>{{what}}" values={{ what: 'world' }} components={[<br />]} />
+  );
+  it('should render translated string', () => {
+    const wrapper = mount(<TestElement />);
+    // console.log(wrapper.debug());
+    expect(
+      wrapper.contains(
+        <div>
+          hello <br />
+          world
+        </div>,
+      ),
+    ).toBe(true);
+  });
+});
+
+describe('trans should not break on invalid node from translations', () => {
+  const TestElement = () => <Trans i18nKey="testInvalidHtml" />;
+  it('should render translated string', () => {
+    const wrapper = mount(<TestElement />);
+    // console.log(wrapper.debug());
+    expect(wrapper.contains(<div>&lt;hello</div>)).toBe(true);
+  });
+});
+
+describe('trans should not break on invalid node from translations - part2', () => {
+  const TestElement = () => <Trans i18nKey="testInvalidHtml2" />;
+  it('should render translated string', () => {
+    const wrapper = mount(<TestElement />);
+    // console.log(wrapper.debug());
+    expect(wrapper.contains(<div>&lt;hello&gt;</div>)).toBe(true);
+  });
+});
+
+describe('Trans should render nested components', () => {
+  it('should render dynamic ul as components property', () => {
+    const list = ['li1', 'li2'];
+
+    const TestElement = () => (
+      <Trans
+        i18nKey="testTrans4KeyWithNestedComponent"
+        components={[
+          <ul>
+            {list.map(item => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>,
+        ]}
+      />
+    );
+    const wrapper = mount(<TestElement />);
+
+    expect(
+      wrapper.contains(
+        <ul>
+          <li>li1</li>
+          <li>li2</li>
+        </ul>,
+      ),
+    ).toBe(true);
+  });
+
+  it('should render dynamic ul as components property when pass as a children', () => {
+    const list = ['li1', 'li2'];
+
+    const TestElement = () => (
+      <Trans i18nKey="testTrans5KeyWithNestedComponent">
+        My list:
+        <ul>
+          {list.map(item => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </Trans>
+    );
+    const wrapper = mount(<TestElement />);
+    expect(
+      wrapper.contains(
+        <ul>
+          <li>li1</li>
+          <li>li2</li>
+        </ul>,
+      ),
+    ).toBe(true);
+  });
+});
+
+describe('Trans should use value from translation', () => {
+  it('should use value from translation if no data provided in component', () => {
+    const TestElement = () => (
+      <Trans
+        i18nKey="testTrans5KeyWithValue"
+        values={{
+          testValue: 'dragonfly',
+        }}
+        components={[<span className="awesome-styles" />]}
+      />
+    );
+
+    const wrapper = mount(<TestElement />);
+    expect(wrapper.contains(<span className="awesome-styles">dragonfly</span>)).toBe(true);
+  });
+
+  it('should use value from translation if dummy data provided in component', () => {
+    const TestElement = () => (
+      <Trans
+        i18nKey="testTrans5KeyWithValue"
+        values={{
+          testValue: 'dragonfly',
+        }}
+        components={[<span className="awesome-styles">test string</span>]}
+      />
+    );
+
+    const wrapper = mount(<TestElement />);
+    expect(wrapper.contains(<span className="awesome-styles">dragonfly</span>)).toBe(true);
   });
 });

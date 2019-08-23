@@ -28,7 +28,10 @@ i18n
   .use(i18nextMiddleware.LanguageDetector)
   .init(
     {
+      debug: false,
       preload: ['en', 'de'],
+      ns: ['translations'],
+      defaultNS: 'translations',
       backend: {
         loadPath: `${appSrc}/locales/{{lng}}/{{ns}}.json`,
         addPath: `${appSrc}/locales/{{lng}}/{{ns}}.missing.json`,
@@ -47,7 +50,7 @@ i18n
               <StaticRouter context={context} location={req.url}>
                 <App />
               </StaticRouter>
-            </I18nextProvider>
+            </I18nextProvider>,
           );
           // This line must be placed after renderToString method
           // otherwise context won't be populated by App
@@ -57,10 +60,8 @@ i18n
           } else {
             const initialI18nStore = {};
             req.i18n.languages.forEach(l => {
-              console.log(req.i18n.services.resourceStore.data[l]);
               initialI18nStore[l] = req.i18n.services.resourceStore.data[l];
             });
-            debugger;
             const initialLanguage = req.i18n.language;
 
             res.status(200).send(
@@ -81,11 +82,11 @@ i18n
         <body>
             <div id="root">${markup}</div>
         </body>
-    </html>`
+    </html>`,
             );
           }
         });
-    }
+    },
   );
 
 export default server;

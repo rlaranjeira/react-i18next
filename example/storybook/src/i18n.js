@@ -1,44 +1,25 @@
 import i18n from 'i18next';
-import LocizeBackend from 'i18next-locize-backend';
-import LocizeEditor from 'locize-editor';
+import Backend from 'i18next-xhr-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import { reactI18nextModule } from 'react-i18next';
+import { initReactI18next } from 'react-i18next';
 
 i18n
-  .use(reactI18nextModule)
-  .use(LocizeBackend)
-  .use(LocizeEditor)
+  // load translation using xhr -> see /public/locales
+  // learn more: https://github.com/i18next/i18next-xhr-backend
+  .use(Backend)
+  // detect user language
+  // learn more: https://github.com/i18next/i18next-browser-languageDetector
   .use(LanguageDetector)
+  // pass the i18n instance to react-i18next.
+  .use(initReactI18next)
+  // init i18next
+  // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     fallbackLng: 'en',
-    appendNamespaceToCIMode: true,
-    saveMissing: true,
-
-    // have a common namespace used around the full app
-    ns: ['translations'],
-    defaultNS: 'translations',
-
     debug: true,
-    keySeparator: '### not used ###', // we use content as keys
-    nsSeparator: '### not used ###', // we use content as keys
-
-    backend: {
-      projectId: 'e365e54a-c52c-479b-8538-682635db252f', // <-- replace with your projectId
-      apiKey: 'your apiKey',
-      referenceLng: 'en',
-    },
 
     interpolation: {
-      escapeValue: false, // not needed for react!!
-      formatSeparator: ',',
-      format(value, format, lng) {
-        if (format === 'uppercase') return value.toUpperCase();
-        return value;
-      },
-    },
-
-    react: {
-      wait: true,
+      escapeValue: false, // not needed for react as it escapes by default
     },
   });
 

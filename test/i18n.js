@@ -1,5 +1,10 @@
 import i18n from 'i18next';
 
+// set instance on hooks stuff
+import { setI18n } from '../src/context';
+
+setI18n(i18n);
+
 i18n.init({
   lng: 'en',
   fallbackLng: 'en',
@@ -12,7 +17,10 @@ i18n.init({
         interpolateKey2: '<strong>add</strong> {{insert}} {{up, uppercase}}',
         transTest1: 'Go <1>there</1>.',
         transTest1_noParent: '<0>Go <1>there</1>.</0>',
-        transTest1_customHtml: 'Go <br/><1>there</1>.',
+        transTest1_customHtml: '<strong>Go</strong> <br/><1>there</1>.',
+        transTest1_customHtml2: '<strong>Go</strong> <br/> there.',
+        transTest1_customHtml3:
+          '<strong>Go</strong><video /><script>console.warn("test")</script> there.',
         transTest2:
           'Hello <1><0>{{name}}</0></1>, you have <3>{{count}}</3> message. Open <5>hear</5>.',
         transTest2_plural:
@@ -26,6 +34,11 @@ i18n.init({
         testTransKey2_plural: '<0><0>{{numOfItems}}</0></0> items matched.',
         testTransKey3: 'Result: <1><0>{{numOfItems}}</0></1> item matched.',
         testTransKey3_plural: 'Result: <1><0>{{numOfItems}}</0></1> items matched.',
+        testInvalidHtml: '<hello',
+        testInvalidHtml2: '<hello>',
+        testTrans4KeyWithNestedComponent: 'Result should be a list: <0></0>',
+        testTrans5KeyWithNestedComponent: 'Result should be a list: <1></1>',
+        testTrans5KeyWithValue: 'Result should be rendered within tag <0>{{testValue}}</0>',
       },
       other: {
         transTest1: 'Another go <1>there</1>.',
@@ -44,7 +57,8 @@ i18n.init({
 
   react: {
     defaultTransParent: 'div',
-    nsMode: 'default',
+    transSupportBasicHtmlNodes: true,
+    transKeepBasicHtmlNodesFor: ['br', 'strong', 'i'],
   },
 });
 

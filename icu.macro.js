@@ -6,7 +6,7 @@ module.exports = createMacro(ICUMacro);
 
 function ICUMacro({ references, state, babel }) {
   const t = babel.types;
-  const { Trans = [], Plural = [], Select = [] } = references;
+  const { Trans = [], Plural = [], Select = [], SelectOrdinal = [] } = references;
 
   // assert we have the react-i18next Trans component imported
   addNeededImports(state, babel);
@@ -20,7 +20,24 @@ function ICUMacro({ references, state, babel }) {
           attributes: referencePath.parentPath.get('attributes'),
           children: referencePath.parentPath.parentPath.get('children'),
         },
-        babel
+        babel,
+      );
+    } else {
+      // throw a helpful error message or something :)
+    }
+  });
+
+  // transform SelectOrdinal
+  SelectOrdinal.forEach(referencePath => {
+    if (referencePath.parentPath.type === 'JSXOpeningElement') {
+      // selectordinal is a form of plural
+      pluralAsJSX(
+        referencePath.parentPath,
+        {
+          attributes: referencePath.parentPath.get('attributes'),
+          children: referencePath.parentPath.parentPath.get('children'),
+        },
+        babel,
       );
     } else {
       // throw a helpful error message or something :)
@@ -36,7 +53,7 @@ function ICUMacro({ references, state, babel }) {
           attributes: referencePath.parentPath.get('attributes'),
           children: referencePath.parentPath.parentPath.get('children'),
         },
-        babel
+        babel,
       );
     } else {
       // throw a helpful error message or something :)
@@ -52,7 +69,7 @@ function ICUMacro({ references, state, babel }) {
           attributes: referencePath.parentPath.get('attributes'),
           children: referencePath.parentPath.parentPath.get('children'),
         },
-        babel
+        babel,
       );
     } else {
       // throw a helpful error message or something :)
@@ -65,6 +82,9 @@ function pluralAsJSX(parentPath, { attributes }, babel) {
   const toObjectProperty = (name, value) =>
     t.objectProperty(t.identifier(name), t.identifier(name), false, !value);
 
+  // plural or selectordinal
+  const nodeName = parentPath.node.name.name.toLocaleLowerCase();
+
   let componentStartIndex = 0;
 
   const extracted = attributes.reduce(
@@ -73,9 +93,9 @@ function pluralAsJSX(parentPath, { attributes }, babel) {
         // copy the i18nKey
         mem.attributesToCopy.push(attr.node);
       } else if (attr.node.name.name === 'count') {
-        // take the count for plural element
+        // take the count for element
         mem.values.push(toObjectProperty(attr.node.value.expression.name));
-        mem.defaults = `{${attr.node.value.expression.name}, plural, ${mem.defaults}`;
+        mem.defaults = `{${attr.node.value.expression.name}, ${nodeName}, ${mem.defaults}`;
       } else if (attr.node.value.type === 'StringLiteral') {
         // take any string node as plural option
         let pluralForm = attr.node.name.name;
@@ -97,7 +117,7 @@ function pluralAsJSX(parentPath, { attributes }, babel) {
       }
       return mem;
     },
-    { attributesToCopy: [], values: [], components: [], defaults: '' }
+    { attributesToCopy: [], values: [], components: [], defaults: '' },
   );
 
   // replace the node with the new Trans
@@ -136,7 +156,7 @@ function selectAsJSX(parentPath, { attributes }, babel) {
       }
       return mem;
     },
-    { attributesToCopy: [], values: [], components: [], defaults: '' }
+    { attributesToCopy: [], values: [], components: [], defaults: '' },
   );
 
   // replace the node with the new Trans
@@ -144,11 +164,34 @@ function selectAsJSX(parentPath, { attributes }, babel) {
 }
 
 function transAsJSX(parentPath, { attributes, children }, babel) {
-  const extracted = processTrans(children, babel);
+  const defaultsAttr = findAttribute('defaults', attributes);
+  const componentsAttr = findAttribute('components', attributes);
+  // if there is "defaults" attribute and no "components" attribute, parse defaults and extract from the parsed defaults instead of children
+  // if a "components" attribute has been provided, we assume they have already constructed a valid "defaults" and it does not need to be parsed
+  const parseDefaults = defaultsAttr && !componentsAttr;
+
+  let extracted;
+  if (parseDefaults) {
+    const defaultsExpression = defaultsAttr.node.value.value;
+    const parsed = babel.parse(`<>${defaultsExpression}</>`, {
+      presets: ['@babel/react'],
+    }).program.body[0].expression.children;
+
+    extracted = processTrans(parsed, babel);
+  } else {
+    extracted = processTrans(children, babel);
+  }
+
+  let clonedAttributes = cloneExistingAttributes(attributes);
+  if (parseDefaults) {
+    // remove existing defaults so it can be replaced later with the new parsed defaults
+    clonedAttributes = clonedAttributes.filter(node => node.name.name !== 'defaults');
+  }
 
   // replace the node with the new Trans
-  children[0].parentPath.replaceWith(
-    buildTransElement(extracted, cloneExistingAttributes(attributes), babel.types, false, true)
+  const replacePath = children.length ? children[0].parentPath : parentPath;
+  replacePath.replaceWith(
+    buildTransElement(extracted, clonedAttributes, babel.types, false, !!children.length),
   );
 }
 
@@ -157,7 +200,7 @@ function buildTransElement(
   finalAttributes,
   t,
   closeDefaults = false,
-  wasElementWithChildren = false
+  wasElementWithChildren = false,
 ) {
   const nodeName = t.jSXIdentifier('Trans');
 
@@ -171,15 +214,15 @@ function buildTransElement(
   // add generated Trans attributes
   if (!attributeExistsAlready('defaults', finalAttributes))
     finalAttributes.push(
-      t.jSXAttribute(t.jSXIdentifier('defaults'), t.StringLiteral(extracted.defaults))
+      t.jSXAttribute(t.jSXIdentifier('defaults'), t.StringLiteral(extracted.defaults)),
     );
   if (!attributeExistsAlready('components', finalAttributes))
     finalAttributes.push(
-      t.jSXAttribute(t.jSXIdentifier('components'), t.jSXExpressionContainer(extracted.components))
+      t.jSXAttribute(t.jSXIdentifier('components'), t.jSXExpressionContainer(extracted.components)),
     );
   if (!attributeExistsAlready('values', finalAttributes))
     finalAttributes.push(
-      t.jSXAttribute(t.jSXIdentifier('values'), t.jSXExpressionContainer(extracted.values))
+      t.jSXAttribute(t.jSXIdentifier('values'), t.jSXExpressionContainer(extracted.values)),
     );
 
   // create selfclosing Trans component
@@ -196,12 +239,15 @@ function cloneExistingAttributes(attributes) {
   }, []);
 }
 
-function attributeExistsAlready(name, attributes) {
-  const found = attributes.find(child => {
+function findAttribute(name, attributes) {
+  return attributes.find(child => {
     const ele = child.node ? child.node : child;
     return ele.name.name === name;
   });
-  return !!found;
+}
+
+function attributeExistsAlready(name, attributes) {
+  return !!findAttribute(name, attributes);
 }
 
 function processTrans(children, babel, componentStartIndex = 0) {
@@ -240,7 +286,7 @@ function mergeChildren(children, babel, componentStartIndex = 0) {
     if (t.isJSXElement(ele)) {
       mem += `<${componentFoundIndex}>${mergeChildren(
         ele.children,
-        babel
+        babel,
       )}</${componentFoundIndex}>`;
       componentFoundIndex++;
     }
@@ -262,7 +308,7 @@ function getValues(children, babel) {
     // add `{ var, number }` to values
     if (ele.expression && ele.expression.expressions)
       mem.push(
-        toObjectProperty(ele.expression.expressions[0].name || ele.expression.expressions[0].value)
+        toObjectProperty(ele.expression.expressions[0].name || ele.expression.expressions[0].value),
       );
     // add `{ var: 'bar' }` to values
     if (ele.expression && ele.expression.properties) mem = mem.concat(ele.expression.properties);
@@ -306,7 +352,7 @@ function addNeededImports(state, babel) {
 
   // check if there is an existing react-i18next import
   const existingImport = state.file.path.node.body.find(
-    importNode => t.isImportDeclaration(importNode) && importNode.source.value === 'react-i18next'
+    importNode => t.isImportDeclaration(importNode) && importNode.source.value === 'react-i18next',
   );
 
   // append Trans to existing or add a new react-i18next import for the Trans
@@ -314,7 +360,7 @@ function addNeededImports(state, babel) {
     importsToAdd.forEach(name => {
       if (
         existingImport.specifiers.findIndex(
-          specifier => specifier.imported && specifier.imported.name === name
+          specifier => specifier.imported && specifier.imported.name === name,
         ) === -1
       ) {
         existingImport.specifiers.push(t.importSpecifier(t.identifier(name), t.identifier(name)));
@@ -324,8 +370,8 @@ function addNeededImports(state, babel) {
     state.file.path.node.body.unshift(
       t.importDeclaration(
         importsToAdd.map(name => t.importSpecifier(t.identifier(name), t.identifier(name))),
-        t.stringLiteral('react/i18next')
-      )
+        t.stringLiteral('react-i18next'),
+      ),
     );
   }
 }
